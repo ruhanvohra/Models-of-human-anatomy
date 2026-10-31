@@ -167,6 +167,21 @@ class BlenderViewportController:
                         break
 
     @classmethod
+    def peel_structures_by_keywords(cls, keywords: List[str]) -> int:
+        """Hides structures matching specific keywords (e.g. ribs, pectoralis) to reveal deep viscera."""
+        if not BLENDER_AVAILABLE or not keywords:
+            return 0
+        peeled = 0
+        for obj in bpy.data.objects:
+            name_lower = obj.name.lower()
+            if any(k.lower() in name_lower for k in keywords):
+                if not obj.hide_viewport:
+                    obj.hide_viewport = True
+                    obj.hide_set(True)
+                    peeled += 1
+        return peeled
+
+    @classmethod
     def reset_visibility(cls):
         """Restores normal visibility to all objects."""
         if not BLENDER_AVAILABLE:
@@ -184,6 +199,9 @@ class BlenderViewportController:
         for cmd in commands:
             action = cmd.get("command")
             if action == "highlight":
+                peel_kws = cmd.get("peel_keywords")
+                if peel_kws:
+                    cls.peel_structures_by_keywords(peel_kws)
                 targets = cmd.get("resolved_mesh_patterns") or cmd.get("target_muscles", [])
                 color_map = cmd.get("color_map", {})
                 count = cls.highlight_structures(targets, color_map)

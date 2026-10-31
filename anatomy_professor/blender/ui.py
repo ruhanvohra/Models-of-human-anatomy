@@ -38,20 +38,33 @@ class AnatomyProfessorProperties(bpy.types.PropertyGroup):
     quiz_feedback: bpy.props.StringProperty(default="")
 
 
+class ANATOMY_OT_load_preset(bpy.types.Operator):
+    """Load and execute a guided masterclass preset."""
+    bl_idname = "anatomy.load_preset"
+    bl_label = "Load Guided Lesson"
+    bl_description = "Loads a curated anatomical masterclass and runs it"
+
+    preset_query: bpy.props.StringProperty(default="")
+
+    def execute(self, context):
+        props = context.scene.anatomy_professor
+        props.user_query = self.preset_query
+        bpy.ops.anatomy.ask_professor()
+        return {'FINISHED'}
+
+
 class ANATOMY_OT_ask_professor(bpy.types.Operator):
     """Send question to Professor Gemma."""
     bl_idname = "anatomy.ask_professor"
     bl_label = "Ask Professor Gemma"
     bl_description = "Process natural language prompt with Gemma and verified TA2 data"
 
-    preset_query: bpy.props.StringProperty(default="")
-
     def execute(self, context):
         props = context.scene.anatomy_professor
-        query = self.preset_query if self.preset_query else props.user_query
+        query = props.user_query.strip()
 
-        if not query.strip():
-            self.report({'WARNING'}, "Please enter a question.")
+        if not query:
+            self.report({'WARNING'}, "Please enter an anatomical question or command.")
             return {'CANCELLED'}
 
         agent = get_agent()
@@ -78,6 +91,7 @@ class ANATOMY_OT_ask_professor(bpy.types.Operator):
             props.quiz_feedback = ""
         else:
             props.quiz_in_progress = False
+            props.quiz_feedback = ""
 
         self.report({'INFO'}, "Professor Gemma answered.")
         return {'FINISHED'}
@@ -178,15 +192,21 @@ class ANATOMY_PT_professor_panel(bpy.types.Panel):
 
         # Guided Lesson Quick Presets
         layout.separator()
-        layout.label(text="Guided Masterclasses:")
+        layout.label(text="Quick Masterclass Presets:")
         col = layout.column(align=True)
-        op = col.operator("anatomy.ask_professor", text="🎯 Shoulder Abduction & Innervation", icon='ORIENTATION_GIMBAL')
+        op = col.operator("anatomy.load_preset", text="🫁 Respiratory System & Gas Exchange", icon='OUTLINER_OB_FORCE_FIELD')
+        op.preset_query = "Show me the parts of the respiratory system responsible for oxygen infusion into the blood"
+
+        op = col.operator("anatomy.load_preset", text="🎯 Shoulder Abduction & Innervation", icon='ORIENTATION_GIMBAL')
         op.preset_query = "Show me the muscles responsible for shoulder abduction, explain their innervation, and quiz me on them."
 
-        op = col.operator("anatomy.ask_professor", text="⚡ Brachial Plexus & Axillary Nerve", icon='NETWORK_DRIVE')
+        op = col.operator("anatomy.load_preset", text="❤️ Cardiovascular System & Heart", icon='HEART' if hasattr(bpy.types, "HEART") else 'EXPERIMENTAL')
+        op.preset_query = "Show me the heart chambers, aorta, and pulmonary vessels"
+
+        op = col.operator("anatomy.load_preset", text="⚡ Brachial Plexus & Axillary Nerve", icon='NETWORK_DRIVE')
         op.preset_query = "Explain the innervation and spinal roots of the deltoid and rotator cuff."
 
-        op = col.operator("anatomy.ask_professor", text="🚶 Hip Abduction & Trendelenburg", icon='MOD_ARMATURE')
+        op = col.operator("anatomy.load_preset", text="🚶 Hip Abduction & Trendelenburg", icon='MOD_ARMATURE')
         op.preset_query = "Explain the muscles of hip abduction and quiz me on gait stabilization."
 
         # Viewport Tools
@@ -245,6 +265,7 @@ class ANATOMY_PT_professor_panel(bpy.types.Panel):
 
 classes = [
     AnatomyProfessorProperties,
+    ANATOMY_OT_load_preset,
     ANATOMY_OT_ask_professor,
     ANATOMY_OT_answer_quiz,
     ANATOMY_OT_submit_mesh_answer,

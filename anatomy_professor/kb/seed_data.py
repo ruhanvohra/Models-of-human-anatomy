@@ -1,13 +1,172 @@
 """
 Verified Anatomical Knowledge Base Seed Data.
 Contains peer-reviewed, ground-truth relationships for muscle actions,
-innervations, spinal root levels, and clinical correlations.
+innervations, spinal root levels, bodily systems, physiology, and clinical correlations.
 Used to strictly ground the Gemma Anatomical Professor.
 """
 
+# Verified Physiological Systems & Functional Knowledge
+VERIFIED_SYSTEMS = {
+    "respiratory": {
+        "system_name": "Respiratory System (Systema respiratorium)",
+        "ta2_id": 3133,
+        "keywords": ["respirat", "lung", "oxygen", "alveol", "bronch", "trachea", "pulmon", "airway", "breath", "gas exchange"],
+        "primary_3d_structures": [
+            "Superior lobe of right lung",
+            "Middle lobe of right lung",
+            "Inferior lobe of right lung",
+            "Superior lobe of left lung",
+            "Inferior lobe of left lung",
+            "Right main bronchus",
+            "Left main bronchus",
+            "Trachea",
+            "Pulmonary trunk",
+            "Left pulmonary artery",
+            "Right pulmonary artery",
+            "Left superior pulmonary vein",
+            "Left inferior pulmonary vein",
+            "Right superior pulmonary vein",
+            "Right inferior pulmonary vein"
+        ],
+        "functional_subunits": [
+            {
+                "name": "Alveolar-Capillary Membrane (Blood-Air Barrier)",
+                "type": "Microscopic Gas Exchange Unit",
+                "role": "Site of oxygen infusion into blood and carbon dioxide clearance",
+                "mechanism": (
+                    "Oxygen crosses the extremely thin (0.2–0.5 μm) blood-air barrier by simple passive diffusion. "
+                    "The barrier consists of Type I alveolar cells (squamous pneumocytes), the shared extracellular basement membrane, "
+                    "and the capillary endothelial cells. Oxygen diffuses down its partial pressure gradient from the alveolar air "
+                    "(pO2 ≈ 104 mmHg) into deoxygenated capillary blood (pO2 ≈ 40 mmHg), where >98% binds to hemoglobin in erythrocytes."
+                )
+            },
+            {
+                "name": "Bronchial Tree (Conducting Zone)",
+                "type": "Airway Transport Conduit",
+                "role": "Humidification, filtration, and transport of air to respiratory zones",
+                "mechanism": (
+                    "Extends from the trachea to the main bronchi, lobar bronchi, segmental bronchi, and terminal bronchioles. "
+                    "Lined by pseudostratified ciliated columnar epithelium with goblet cells (the mucociliary escalator) "
+                    "to capture particulates before air reaches the fragile gas-exchange parenchyma."
+                )
+            },
+            {
+                "name": "Pulmonary Circulation (Vascular Interface)",
+                "type": "Blood Supply for Gas Exchange",
+                "role": "Delivers deoxygenated blood from right ventricle and returns oxygen-rich blood to left atrium",
+                "mechanism": (
+                    "The pulmonary trunk bifurcates into the right and left pulmonary arteries, carrying venous/deoxygenated blood "
+                    "into the pulmonary capillary plexus enveloping each alveolus. After oxygen uptake, four pulmonary veins "
+                    "(two left, two right) carry newly oxygenated blood directly into the left atrium for systemic distribution."
+                )
+            }
+        ],
+        "peel_keywords": ["pectoralis", "rib", "intercostal", "costal", "sternum", "subclavius"],
+        "default_camera": "anterior"
+    },
+    "cardiovascular": {
+        "system_name": "Cardiovascular System (Systema cardiovasculare)",
+        "ta2_id": 3889,
+        "keywords": ["heart", "cardio", "aort", "ventricl", "atrium", "arter", "vein", "coronary", "valve", "circulat"],
+        "primary_3d_structures": [
+            "Ascending aorta",
+            "Aortic arch",
+            "Pulmonary trunk",
+            "Superior vena cava",
+            "Inferior vena cava",
+            "Right ventricle",
+            "Left ventricle",
+            "Right atrium",
+            "Left atrium",
+            "Pulmonary valve",
+            "Aortic valve"
+        ],
+        "functional_subunits": [
+            {
+                "name": "Heart Chambers & Valves",
+                "type": "Central Muscular Pump",
+                "role": "Propels blood through pulmonary and systemic circuits",
+                "mechanism": (
+                    "Right heart pumps deoxygenated blood to the lungs via the pulmonary trunk. "
+                    "Left heart receives oxygenated blood from pulmonary veins and propels it at high pressure through the aorta."
+                )
+            }
+        ],
+        "peel_keywords": ["pectoralis", "rib", "intercostal", "sternum"],
+        "default_camera": "anterior"
+    },
+    "digestive": {
+        "system_name": "Digestive System (Systema digestorium)",
+        "ta2_id": 2773,
+        "keywords": ["digest", "stomach", "liver", "pancreas", "esophag", "intestin", "colon", "duodenum", "gallbladder"],
+        "primary_3d_structures": [
+            "Stomach",
+            "Liver",
+            "Gallbladder",
+            "Pancreas",
+            "Duodenum",
+            "Oesophagus"
+        ],
+        "functional_subunits": [
+            {
+                "name": "Gastrointestinal Tract & Accessory Glands",
+                "type": "Digestive & Metabolic Unit",
+                "role": "Mechanical and chemical breakdown of food, nutrient absorption, and hepatic metabolism",
+                "mechanism": "Enzymatic hydrolysis, acid secretion in stomach, bile and pancreatic enzyme neutralization in duodenum."
+            }
+        ],
+        "peel_keywords": ["rectus abdominis", "external oblique", "internal oblique", "transversus abdominis"],
+        "default_camera": "anterior"
+    },
+    "urinary": {
+        "system_name": "Urinary System (Systema urinarium)",
+        "ta2_id": 3351,
+        "keywords": ["kidney", "urinary", "nephron", "ureter", "bladder", "renal", "filtrat"],
+        "primary_3d_structures": [
+            "Left kidney",
+            "Right kidney",
+            "Left ureter",
+            "Right ureter",
+            "Urinary bladder",
+            "Renal artery",
+            "Renal vein"
+        ],
+        "functional_subunits": [
+            {
+                "name": "Nephrons & Renal Parenchyma",
+                "type": "Filtration and Osmoregulation Unit",
+                "role": "Blood filtration, waste elimination, and electrolyte balance",
+                "mechanism": "Glomerular ultrafiltration followed by tubular reabsorption and secretion in proximal/distal tubules."
+            }
+        ],
+        "peel_keywords": ["rectus abdominis", "internal oblique", "external oblique", "quadratus lumborum"],
+        "default_camera": "posterior"
+    },
+    "nervous": {
+        "system_name": "Nervous System (Systema nervosum)",
+        "ta2_id": 5519,
+        "keywords": ["brain", "cerebr", "cerebell", "spinal cord", "nerve", "cranial", "plexus", "neural"],
+        "primary_3d_structures": [
+            "Brain",
+            "Spinal cord",
+            "Brainstem",
+            "Cerebellum",
+            "Cerebrum"
+        ],
+        "functional_subunits": [
+            {
+                "name": "Central and Peripheral Neural Networks",
+                "type": "Signal Integration & Transmission",
+                "role": "Sensorimotor integration, autonomic regulation, and cognitive processing",
+                "mechanism": "Action potential generation, synaptic neurotransmitter release, and ascending/descending spinal tracts."
+            }
+        ],
+        "peel_keywords": ["galea aponeurotica", "calvaria", "skull"],
+        "default_camera": "superior"
+    }
+}
+
 # Verified Biomechanical Actions
-# Format:
-# (muscle_name, action, joint, phase_degrees, role, notes)
 VERIFIED_ACTIONS = [
     # Shoulder Abduction
     ("Supraspinatus muscle", "abduction", "glenohumeral", "0-15 degrees", "initiator",
@@ -91,8 +250,6 @@ VERIFIED_ACTIONS = [
 ]
 
 # Verified Innervations and Nerve Roots
-# Format:
-# (muscle_name, nerve_name, spinal_roots, plexus_or_source)
 VERIFIED_INNERVATIONS = [
     ("Supraspinatus muscle", "Suprascapular nerve", "C5, C6", "Superior trunk of brachial plexus"),
     ("Infraspinatus muscle", "Suprascapular nerve", "C5, C6", "Superior trunk of brachial plexus"),
@@ -130,7 +287,8 @@ VERIFIED_INNERVATIONS = [
     ("Semimembranosus muscle", "Tibial nerve (division of sciatic)", "L5, S1, S2", "Sacral plexus"),
     ("Tibialis anterior muscle", "Deep fibular (peroneal) nerve", "L4, L5", "Common fibular nerve"),
     ("Gastrocnemius muscle", "Tibial nerve", "S1, S2", "Sciatic nerve tibial branch"),
-    ("Soleus muscle", "Tibial nerve", "S1, S2", "Sciatic nerve tibial branch")
+    ("Soleus muscle", "Tibial nerve", "S1, S2", "Sciatic nerve tibial branch"),
+    ("Diaphragm", "Phrenic nerve", "C3, C4, C5", "Cervical plexus ('C3, 4, 5 keeps the diaphragm alive')")
 ]
 
 # Verified Clinical Vignettes for Quizzing
@@ -234,4 +392,3 @@ VERIFIED_CLINICAL_CASES = [
         )
     }
 ]
-

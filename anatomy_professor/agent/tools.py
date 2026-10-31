@@ -55,8 +55,16 @@ def execute_tool(tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         joint = arguments.get("joint")
         muscle_name = arguments.get("muscle_name")
         search_term = arguments.get("search_term")
+        system_query = arguments.get("system_query")
 
-        if action:
+        if system_query:
+            sys_info = db.get_system_info(system_query)
+            if sys_info:
+                return {"status": "success", "type": "system_knowledge", "data": sys_info}
+            # Fallback to search structures
+            matches = db.search_structures(system_query, limit=10)
+            return {"status": "success", "type": "structures", "data": matches}
+        elif action:
             results = db.find_muscles_by_action(action, joint)
             return {"status": "success", "type": "action_muscles", "data": results}
         elif muscle_name:
@@ -73,6 +81,7 @@ def execute_tool(tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
         targets = arguments.get("target_muscles", [])
         camera = arguments.get("camera_preset", "auto")
         color_map = arguments.get("color_map", {})
+        peel_keywords = arguments.get("peel_keywords", [])
 
         # Resolve clinical names to Blender mesh object patterns
         resolved_objects = []
@@ -86,7 +95,8 @@ def execute_tool(tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
             "target_muscles": targets,
             "resolved_mesh_patterns": resolved_objects,
             "camera_preset": camera,
-            "color_map": color_map
+            "color_map": color_map,
+            "peel_keywords": peel_keywords
         }
 
     elif tool_name == "get_clinical_quiz":

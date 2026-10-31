@@ -8,6 +8,7 @@ import sqlite3
 import json
 import random
 from typing import List, Dict, Any, Optional
+from .seed_data import VERIFIED_SYSTEMS
 
 DEFAULT_DB_PATH = os.path.join(os.path.dirname(__file__), "anatomy_kb.db")
 
@@ -25,6 +26,17 @@ class AnatomyDatabase:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         return conn
+
+    def get_system_info(self, query: str) -> Optional[Dict[str, Any]]:
+        """
+        Retrieves verified system knowledge (e.g. respiratory, cardiovascular, digestive)
+        matching keywords in the query.
+        """
+        q_lower = query.lower()
+        for sys_key, sys_data in VERIFIED_SYSTEMS.items():
+            if sys_key in q_lower or any(kw in q_lower for kw in sys_data.get("keywords", [])):
+                return sys_data
+        return None
 
     def find_muscles_by_action(self, action: str, joint: Optional[str] = None) -> List[Dict[str, Any]]:
         """

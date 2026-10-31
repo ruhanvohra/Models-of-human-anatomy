@@ -25,6 +25,12 @@ class TestAnatomyKnowledgeBase(unittest.TestCase):
         self.assertIn("C5", deltoid_data[0]["spinal_roots"])
         self.assertIn("C6", deltoid_data[0]["spinal_roots"])
 
+    def test_system_query_retrieval(self):
+        sys_data = self.db.get_system_info("respiratory system oxygen infusion")
+        self.assertIsNotNone(sys_data)
+        self.assertEqual(sys_data["ta2_id"], 3133)
+        self.assertTrue(any("lung" in s.lower() for s in sys_data["primary_3d_structures"]))
+
     def test_clinical_case_retrieval(self):
         case = self.db.get_clinical_case("case_shoulder_dislocation")
         self.assertIsNotNone(case)
@@ -35,6 +41,24 @@ class TestAnatomyKnowledgeBase(unittest.TestCase):
 class TestGemmaProfessorAgent(unittest.TestCase):
     def setUp(self):
         self.agent = AnatomyProfessorAgent()
+
+    def test_respiratory_system_custom_query(self):
+        prompt = "Show me the parts of the respiratory system responsible for oxygen infusion into the blood"
+        res = self.agent.process_query(prompt)
+
+        self.assertIn("Respiratory System", res["response"])
+        self.assertIn("Blood-Air Barrier", res["response"])
+        self.assertTrue(len(res["blender_commands"]) > 0)
+        self.assertIsNone(res["quiz"], "Should not inject a quiz when only asking for an explanation/view")
+        cmd = res["blender_commands"][0]
+        self.assertIn("peel_keywords", cmd)
+        self.assertTrue(any("lung" in s.lower() for s in cmd["target_muscles"]))
+
+    def test_arbitrary_structure_search(self):
+        prompt = "Show me the femur"
+        res = self.agent.process_query(prompt)
+        self.assertIn("Femur", res["response"])
+        self.assertTrue(len(res["blender_commands"]) > 0)
 
     def test_user_example_query(self):
         prompt = "Show me the muscles responsible for shoulder abduction, explain their innervation, and quiz me on them."
@@ -61,4 +85,3 @@ class TestGemmaProfessorAgent(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
