@@ -95,6 +95,6 @@ Paola Perin, Daniele Cossellu, Elisa Vivado (Italian translation of the anatomic
 Jadwiga Palosz (Polish translation of the anatomical structures)
 Shariar Ahmadpour (Parsi translation of the anatomical structures)
 ## HACKTOBERFEST AUTHORS:
-Ruhan
-Esteban 
-Noah Lucas
+Ruhan Vohrn,
+Esteban Fuentes,  
+and Noah Lucas
