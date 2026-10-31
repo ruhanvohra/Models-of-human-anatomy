@@ -1,9 +1,81 @@
 """
 Verified Anatomical Knowledge Base Seed Data.
 Contains peer-reviewed, ground-truth relationships for muscle actions,
-innervations, spinal root levels, bodily systems, physiology, and clinical correlations.
+innervations, spinal root levels, bodily systems, physiology pathways, and clinical correlations.
 Used to strictly ground the Gemma Anatomical Professor.
 """
+
+# Specific Physiological Pathways & Functional Sub-Mechanisms
+VERIFIED_PHYSIOLOGY_PATHWAYS = [
+    {
+        "id": "blood_sugar_lowering",
+        "keywords": [
+            "lowering blood sugar", "lower blood sugar", "reduce blood sugar",
+            "lowering glucose", "lower glucose", "insulin", "blood sugar",
+            "glucose regulation", "glycogenesis", "endocrine pancreas"
+        ],
+        "system_category": "Digestive & Endocrine Systems",
+        "primary_organ": "Pancreas",
+        "related_organs": ["Liver"],
+        "3d_structures": [
+            "Pancreas",
+            "Head of pancreas",
+            "Body of pancreas",
+            "Tail of pancreas",
+            "Liver"
+        ],
+        "title": "Regulation of Blood Glucose: Endocrine Pancreas & Insulin Secretion",
+        "functional_role": "Synthesis and secretion of Insulin by pancreatic Beta cells to lower systemic blood glucose",
+        "cellular_mechanism": (
+            "While the bulk of the pancreas is an exocrine digestive gland (acinar cells producing digestive enzymes), "
+            "its endocrine function is localized in approximately 1 to 2 million microscopic clusters termed the "
+            "**Islets of Langerhans (Pancreatic islets)**. Within these islets:\n"
+            "- **Beta cells (β-cells)** constitute ~70% of islet cells and produce and secrete the peptide hormone **Insulin**.\n"
+            "- When blood glucose rises after a meal, β-cells take up glucose via GLUT transporters, accelerating ATP production, "
+            "which closes ATP-sensitive K+ channels, depolarizes the cell membrane, opens voltage-gated Ca2+ channels, "
+            "and triggers exocytosis of insulin storage granules into the portal circulation."
+        ),
+        "target_action": (
+            "1. **Skeletal Muscle & Adipose Tissue:** Insulin binds tyrosine kinase receptors, promoting GLUT4 translocation to cell surfaces for rapid glucose uptake.\n"
+            "2. **Liver (Target Organ, highlighted in Cyan):** Insulin stimulates glycogen synthase (glycogenesis) and glycolysis, "
+            "while potently suppressing gluconeogenesis and glycogenolysis—reversing hyperglycemia.\n"
+            "3. **Counter-Regulation:** Pancreatic **Alpha cells (α-cells)** produce **Glucagon** to raise blood sugar when fasting."
+        ),
+        "peel_keywords": ["rectus abdominis", "external oblique", "internal oblique", "transversus abdominis", "stomach", "greater omentum"],
+        "color_map": {
+            "pancreas": (1.0, 0.75, 0.1, 1.0), # Gold/Amber (Primary endocrine producer)
+            "liver": (0.2, 0.7, 1.0, 1.0)      # Cyan (Target effector organ)
+        }
+    },
+    {
+        "id": "bile_production_storage",
+        "keywords": ["bile production", "produce bile", "bile synthesis", "store bile", "gallbladder bile"],
+        "system_category": "Digestive System (Hepatobiliary)",
+        "primary_organ": "Liver",
+        "related_organs": ["Gallbladder"],
+        "3d_structures": ["Liver", "Gallbladder"],
+        "title": "Bile Synthesis and Concentration (Hepatobiliary Unit)",
+        "functional_role": "Synthesis, concentration, and delivery of bile salts for dietary fat emulsification",
+        "cellular_mechanism": "Hepatocytes synthesize bile acids from cholesterol; bile drains via hepatic ducts into the gallbladder for storage and concentration.",
+        "target_action": "Cholecystokinin (CCK) stimulates gallbladder contraction and sphincter of Oddi relaxation when lipids enter the duodenum.",
+        "peel_keywords": ["rectus abdominis", "external oblique", "internal oblique"],
+        "color_map": {"liver": (0.8, 0.4, 0.2, 1.0), "gallbladder": (0.2, 0.9, 0.3, 1.0)}
+    },
+    {
+        "id": "gastric_acid_proteolysis",
+        "keywords": ["acid secretion", "gastric acid", "stomach acid", "pepsin", "hydrochloric acid"],
+        "system_category": "Digestive System (Upper GI)",
+        "primary_organ": "Stomach",
+        "related_organs": ["Duodenum", "Oesophagus"],
+        "3d_structures": ["Stomach", "Duodenum"],
+        "title": "Gastric Acid Secretion and Chemical Proteolysis",
+        "functional_role": "Denaturation of dietary proteins and pathogen destruction",
+        "cellular_mechanism": "Parietal (oxyntic) cells in the gastric glands secrete HCl via H+/K+ ATPase proton pumps; Chief cells secrete pepsinogen.",
+        "target_action": "Low luminal pH (1.5–2.0) cleaves pepsinogen to active pepsin, initiating peptide hydrolysis.",
+        "peel_keywords": ["rectus abdominis", "external oblique"],
+        "color_map": {"stomach": (1.0, 0.6, 0.2, 1.0), "duodenum": (0.4, 0.8, 1.0, 1.0)}
+    }
+]
 
 # Verified Physiological Systems & Functional Knowledge
 VERIFIED_SYSTEMS = {

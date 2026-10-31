@@ -69,6 +69,11 @@ class BlenderViewportController:
         matched = []
         for obj in bpy.data.objects:
             obj_name = obj.name
+
+            # Skip helper objects like curve bevel profiles or text/empties
+            if "-profile" in obj_name.lower():
+                continue
+
             clean_base = re.sub(r'\.[a-z0-9]+$', '', obj_name).strip()
 
             for pattern in patterns:
@@ -87,24 +92,39 @@ class BlenderViewportController:
         """
         Highlights and selects the target structures.
         Unhides them if hidden and centers the 3D viewport.
+        Safely ignores objects outside the active View Layer.
         """
         if not BLENDER_AVAILABLE:
             return 0
 
-        # Deselect current selection
+        # Deselect current selection safely
         for obj in bpy.context.selected_objects:
-            obj.select_set(False)
+            try:
+                obj.select_set(False)
+            except (RuntimeError, Exception):
+                pass
 
         matched_objects = cls.find_objects_by_patterns(target_patterns)
         count = 0
+        valid_selected = []
 
         default_color = (1.0, 0.85, 0.1, 1.0) # Yellow/Gold
 
+        # View Layer set for fast membership check
+        view_layer_objects = bpy.context.view_layer.objects if hasattr(bpy.context, "view_layer") else None
+
         for obj in matched_objects:
-            # Ensure visible
-            obj.hide_viewport = False
-            obj.hide_set(False)
-            obj.select_set(True)
+            # Guard against objects not in the active view layer
+            if view_layer_objects and obj.name not in view_layer_objects:
+                continue
+
+            try:
+                obj.hide_viewport = False
+                obj.hide_set(False)
+                obj.select_set(True)
+                valid_selected.append(obj)
+            except (RuntimeError, Exception):
+                continue
 
             # Determine color
             obj_color = default_color
@@ -114,19 +134,23 @@ class BlenderViewportController:
                         obj_color = col
                         break
 
-            # Assign highlight material
-            mat = cls.get_or_create_material(obj_color, name_suffix=f"{int(obj_color[0]*10)}_{int(obj_color[1]*10)}")
-            if mat:
-                if len(obj.data.materials) == 0:
-                    obj.data.materials.append(mat)
-                else:
-                    obj.data.materials[0] = mat
+            # Assign highlight material if object supports materials
+            if hasattr(obj, "data") and hasattr(obj.data, "materials"):
+                mat = cls.get_or_create_material(obj_color, name_suffix=f"{int(obj_color[0]*10)}_{int(obj_color[1]*10)}")
+                if mat:
+                    if len(obj.data.materials) == 0:
+                        obj.data.materials.append(mat)
+                    else:
+                        obj.data.materials[0] = mat
 
             count += 1
 
-        if matched_objects and len(bpy.context.selected_objects) > 0:
-            bpy.context.view_layer.objects.active = matched_objects[0]
-            cls.frame_camera_on_selected()
+        if valid_selected:
+            try:
+                bpy.context.view_layer.objects.active = valid_selected[0]
+                cls.frame_camera_on_selected()
+            except (RuntimeError, Exception):
+                pass
 
         return count
 

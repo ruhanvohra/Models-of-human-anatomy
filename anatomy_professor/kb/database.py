@@ -8,7 +8,7 @@ import sqlite3
 import json
 import random
 from typing import List, Dict, Any, Optional
-from .seed_data import VERIFIED_SYSTEMS
+from .seed_data import VERIFIED_SYSTEMS, VERIFIED_PHYSIOLOGY_PATHWAYS
 
 DEFAULT_DB_PATH = os.path.join(os.path.dirname(__file__), "anatomy_kb.db")
 
@@ -26,6 +26,17 @@ class AnatomyDatabase:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         return conn
+
+    def find_physiology_pathway(self, query: str) -> Optional[Dict[str, Any]]:
+        """
+        Retrieves specific functional mechanisms (e.g. lowering blood sugar / insulin,
+        bile synthesis, gastric acid secretion) matching terms in the query.
+        """
+        q_lower = query.lower()
+        for pathway in VERIFIED_PHYSIOLOGY_PATHWAYS:
+            if any(kw in q_lower for kw in pathway["keywords"]):
+                return pathway
+        return None
 
     def get_system_info(self, query: str) -> Optional[Dict[str, Any]]:
         """

@@ -54,6 +54,17 @@ class TestGemmaProfessorAgent(unittest.TestCase):
         self.assertIn("peel_keywords", cmd)
         self.assertTrue(any("lung" in s.lower() for s in cmd["target_muscles"]))
 
+    def test_blood_sugar_pancreas_query(self):
+        prompt = "Show me the parts of the digestive system responsible for lowering blood sugar"
+        res = self.agent.process_query(prompt)
+
+        self.assertIn("Pancreas", res["response"])
+        self.assertIn("Insulin", res["response"])
+        self.assertIn("Islets of Langerhans", res["response"])
+        self.assertTrue(len(res["blender_commands"]) > 0)
+        cmd = res["blender_commands"][0]
+        self.assertIn("Pancreas", cmd["target_muscles"])
+
     def test_arbitrary_structure_search(self):
         prompt = "Show me the femur"
         res = self.agent.process_query(prompt)

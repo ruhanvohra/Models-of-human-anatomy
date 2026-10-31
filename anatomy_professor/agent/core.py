@@ -44,17 +44,25 @@ class AnatomyProfessorAgent:
         quiz_data = None
 
         # -------------------------------------------------------------
-        # 1. Check for Bodily Systems & Physiological Mechanisms
-        # (e.g. "parts of the respiratory system responsible for oxygen infusion into the blood")
+        # 1. Check for Specific Physiological Pathways & Functional Sub-Mechanisms
+        # (e.g. "parts of the digestive system responsible for lowering blood sugar")
         # -------------------------------------------------------------
-        system_info = self.db.get_system_info(prompt_lower)
+        physio_pathway = self.db.find_physiology_pathway(prompt_lower)
 
-        if system_info:
+        if physio_pathway:
+            explanation, blender_cmds = self._handle_pathway_query(physio_pathway)
+            blender_commands.extend(blender_cmds)
+
+        # -------------------------------------------------------------
+        # 2. Check for Broad Bodily Systems & General Organ Overview
+        # (e.g. "respiratory system", "digestive system")
+        # -------------------------------------------------------------
+        elif system_info := self.db.get_system_info(prompt_lower):
             explanation, blender_cmds = self._handle_system_query(prompt_lower, system_info)
             blender_commands.extend(blender_cmds)
 
         # -------------------------------------------------------------
-        # 2. Check for Biomechanical Joint Movements
+        # 3. Check for Biomechanical Joint Movements
         # (e.g. "muscles responsible for shoulder abduction")
         # -------------------------------------------------------------
         elif action_match := self._extract_movement(prompt_lower):
@@ -191,6 +199,59 @@ class AnatomyProfessorAgent:
             "blender_commands": blender_commands,
             "quiz": quiz_data
         }
+
+    def _handle_pathway_query(self, pathway: Dict[str, Any]) -> tuple:
+        """Formulates targeted physiological masterclasses for specific biochemical pathways."""
+        title = pathway["title"]
+        category = pathway["system_category"]
+        primary_organ = pathway["primary_organ"]
+        structures = pathway["3d_structures"]
+        role = pathway["functional_role"]
+        cell_mech = pathway["cellular_mechanism"]
+        action_mech = pathway["target_action"]
+        peel_kw = pathway.get("peel_keywords", [])
+        color_map = pathway.get("color_map", {})
+
+        lines = [
+            f"### 🔬 Professor Gemma's Masterclass: {title}",
+            f"**System Category:** {category}",
+            "",
+            f"#### 🎯 **Primary Functional Organ: {primary_organ}**",
+            f"- **Role:** {role}",
+            "",
+            "#### 🧪 **Cellular & Molecular Mechanism:**",
+            cell_mech,
+            "",
+            "#### ⚡ **Physiological Pathway & Target Effectors:**",
+            action_mech,
+            "",
+            "#### 🌐 **3D Structures Displayed in Viewport:**",
+            f"I have highlighted the **{primary_organ}** and target effectors in the 3D model:",
+        ]
+        for s in structures:
+            lines.append(f"- `📍 {s}`")
+
+        lines.append("")
+        lines.append("*(Superficial abdominal wall muscles have been peeled to reveal retroperitoneal viscera).*")
+
+        full_color_map = {}
+        for s in structures:
+            for k, col in color_map.items():
+                if k.lower() in s.lower():
+                    full_color_map[s] = col
+                    break
+            if s not in full_color_map:
+                full_color_map[s] = (1.0, 0.85, 0.1, 1.0)
+
+        blender_cmd = execute_tool("blender_control", {
+            "command": "highlight",
+            "target_muscles": structures,
+            "camera_preset": "anterior",
+            "color_map": full_color_map,
+            "peel_keywords": peel_kw
+        })
+
+        return "\n".join(lines), [blender_cmd]
 
     def _handle_system_query(self, prompt: str, system_info: Dict[str, Any]) -> tuple:
         """Formulates rich physiological and anatomical lessons for any bodily system."""
