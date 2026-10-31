@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS
+.DS_Store
+
+# Blender backups and large uncompressed binaries (>100MB)
+*.blend
+*.blend1
+*.blend2
+Z-Anatomy/Startup.blend
+
+# Scratch
+scratch/
+
