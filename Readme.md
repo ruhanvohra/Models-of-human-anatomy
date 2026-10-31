@@ -174,6 +174,6 @@ All code and content shared by 'Z-Anatomy' is under the [Creative Commons Attrib
 - Shariar Ahmadpour (Parsi)
 
 ### Contributors
-- Ruhan Vohra (Gemma Interactive Anatomy Professor, TA2 Knowledge Base, Blender Viewport Controller, Bug Fixes)
+- Ruhan Vohra
 - Esteban Fuentes
 - Noah Lucas
