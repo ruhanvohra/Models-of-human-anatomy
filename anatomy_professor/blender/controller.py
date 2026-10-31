@@ -88,11 +88,48 @@ class BlenderViewportController:
         return matched
 
     @classmethod
+    def enable_collections_for_objects(cls, objects: List[Any]):
+        """
+        Automatically enables and unhides all Scene and Layer collections containing
+        the target objects, walking from the collection up to the root View Layer.
+        Guarantees that the highlighted objects become immediately visible even if
+        their system collection (e.g. Visceral, Muscular, Cardiovascular) was hidden.
+        """
+        if not BLENDER_AVAILABLE or not objects:
+            return
+
+        if not hasattr(bpy.context, "view_layer") or not hasattr(bpy.context.view_layer, "layer_collection"):
+            return
+
+        root_layer_col = bpy.context.view_layer.layer_collection
+
+        def unhide_layer_collection_recursive(layer_col, target_col):
+            if layer_col.collection == target_col:
+                layer_col.exclude = False
+                layer_col.hide_viewport = False
+                return True
+            for child in layer_col.children:
+                if unhide_layer_collection_recursive(child, target_col):
+                    layer_col.exclude = False
+                    layer_col.hide_viewport = False
+                    return True
+            return False
+
+        for obj in objects:
+            for col in getattr(obj, "users_collection", []):
+                unhide_layer_collection_recursive(root_layer_col, col)
+
+        try:
+            bpy.context.view_layer.update()
+        except Exception:
+            pass
+
+    @classmethod
     def highlight_structures(cls, target_patterns: List[str], color_map: Optional[Dict[str, tuple]] = None) -> int:
         """
         Highlights and selects the target structures.
-        Unhides them if hidden and centers the 3D viewport.
-        Safely ignores objects outside the active View Layer.
+        Automatically enables any hidden Scene/Layer collections containing them,
+        unhides the meshes, and centers the 3D viewport.
         """
         if not BLENDER_AVAILABLE:
             return 0
@@ -105,12 +142,16 @@ class BlenderViewportController:
                 pass
 
         matched_objects = cls.find_objects_by_patterns(target_patterns)
+
+        # Automatically enable and unhide collections containing the target objects
+        cls.enable_collections_for_objects(matched_objects)
+
         count = 0
         valid_selected = []
 
         default_color = (1.0, 0.85, 0.1, 1.0) # Yellow/Gold
 
-        # View Layer set for fast membership check
+        # View Layer set for fast membership check after enabling collections
         view_layer_objects = bpy.context.view_layer.objects if hasattr(bpy.context, "view_layer") else None
 
         for obj in matched_objects:
@@ -121,6 +162,9 @@ class BlenderViewportController:
             try:
                 obj.hide_viewport = False
                 obj.hide_set(False)
+                if obj.parent and (obj.parent.hide_viewport or obj.parent.hide_get()):
+                    obj.parent.hide_viewport = False
+                    obj.parent.hide_set(False)
                 obj.select_set(True)
                 valid_selected.append(obj)
             except (RuntimeError, Exception):
