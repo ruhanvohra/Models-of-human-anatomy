@@ -35,7 +35,8 @@ In order to add the icon to the shortcut on your desktop:
 This tutorial shows the shortcuts:  
 [![Z-Anatomy video](https://img.youtube.com/vi/JIxJnw1ARhs/0.jpg)](https://www.youtube.com/watch?v=JIxJnw1ARhs)  
 
-
+## CHANGES
+Added a Gemma agent as a professor. Gemma accesses a database of the information contained in Z-Anatomy, and then uses that information to respond to the user request. It can also quiz the user, including having them select which part of the anatomy corresponds to the correct answer to the question
 ## LICENSE
 
 All the code and content shared by ‘Z-Anatomy’ is under [Creative Commons Attribution-ShareAlike 4.0 International License][cc-by-sa].
@@ -84,7 +85,6 @@ Please be aware of potential errors due to automatic translation from the Englis
 - **”Lluis Vinent”**
 
 ## AUTHORS:
-
 Kousaku OKUBO (Original model ‘BodyParts3D’)
 Gauthier KERVYN (Design, 3D, anatomy)
 Marcin ZIELINSKI (Blender add-on)
@@ -94,3 +94,7 @@ Carlos TORRES VILLAR (Spanish translation of the anatomical structures)
 Paola Perin, Daniele Cossellu, Elisa Vivado (Italian translation of the anatomical structures)
 Jadwiga Palosz (Polish translation of the anatomical structures)
 Shariar Ahmadpour (Parsi translation of the anatomical structures)
+## HACKTOBERFEST AUTHORS:
+Ruhan
+Esteban 
+Noah Lucas
